@@ -118,7 +118,7 @@ void render(BelaContext *context, void *userData)
 	for(unsigned int n = 0; n < context->audioFrames; n++) {
 
 		rx0[n] = audioRead(context, n, 0);
-		rx1[n] = audioRead(context, n, 0);
+		rx1[n] = audioRead(context, n, 1);
 
 	}
 	
