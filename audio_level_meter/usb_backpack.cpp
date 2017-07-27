@@ -197,7 +197,10 @@ void lcd_color(display_20x4_lcd* d, unsigned char r, unsigned char g, unsigned c
     usleep(10*ms);
 }
 
-// Give it a signal bounded (-1.0 to 1.0) and tell whether it is input (true) or output (false)
+// Give it a signal that represents full scale (-1.0 to 1.0) and give a channel to print on the display.
+// Even numbers are bottom track of a row, odd the top track.
+// The row will be chan/2
+// Numbers greater than +/-0.95 will be displayed as clipping.
 void
 lcd_level_meter(display_20x4_lcd* d, float *signal, int N, unsigned char chan)
 {
