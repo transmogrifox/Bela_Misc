@@ -28,9 +28,9 @@ frequency_response_analyzer* make_fra(frequency_response_analyzer* f, float fs)
 
     //Internal parameters
     float step_rate = expf( logf(f->stop_freq/f->start_freq) / ((float) (f->npoints - 1) ));
+    f->inst_freq = FREQ_ANAL_DEFAULT_START / step_rate;  //it will begin one interval below to stabilize steady state before measurement
     f->pk_filter_coeff = 1.0 - expf( -20.0 * M_PI * f->inst_freq * f->ifs ); //noise filter set a decade above instantaneous frequency
     f->freq_rate_coeff = expf( logf(f->stop_freq/f->start_freq) / (f->sweep_time*f->fs));
-    f->inst_freq = FREQ_ANAL_DEFAULT_START / step_rate;  //it will begin one interval below to stabilize steady state before measurement
     f->fstart = f->inst_freq;
     f->frq_bin_ptr = 1;
 
