@@ -29,7 +29,7 @@ int main()
         x = cos(w0*t);
         fprintf(outfile, "%.12lf %lf\r\n", t, x);
         t += dt0;
-        fprintf(outfile, "%lf %lf\r\n", t, x);
+        fprintf(outfile, "%.12lf %lf\r\n", t, x);
         t += dt1;
     }
 
