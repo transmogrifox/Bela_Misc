@@ -98,7 +98,7 @@ biquad_reset_state_variables(biquad_coeffs* cf)
     cf->y1 = 0.0;
     cf->y2 = 0.0;
     cf->x1 = 0.0;
-    cf->x2 = 0.0;    
+    cf->x2 = 0.0;
 }
 
 biquad_coeffs*
@@ -185,36 +185,3 @@ run_APF_one_pole(float x, biquad_coeffs* cf)
     return 2.0*y0 - x; //converts to APF function
 
 }
-
-
-float sqr(float x)
-{
-    return x*x;
-}
-
-
-// int main(int argc, char** argv)
-// {
-
-
-    //construct filters
-    // biquad_coeffs* f;
-    // f = make_biquad(BPF, f, 44100.0, 800.0, 10.0);
-
-
-    // for(j=0; j<maxtime; j++)
-    // {
-        // if(j>startstep)
-            // x0 = 1.0;
-        // y0 = run_APF_one_pole(x0, f[4]);
-        // printf("%f\t%f\n", ((float) j)/fs, y0);
-    // }
-
-    // for(j=0;j<5;j++)
-    // {
-        // free(f[j]);
-    // }
-    // free(q);
-
-    // return 0;
-// }

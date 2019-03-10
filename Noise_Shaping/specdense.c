@@ -1,9 +1,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-//#include <fftw3>  //if in your compiler search path
+#include <fftw3.h>  //if in your compiler search path
 
-#include "../../../FFTW3/fftw-3.3.5-dll32/fftw3.h" //or path to libfftw3 header
+//#include "../../../FFTW3/fftw-3.3.5-dll32/fftw3.h" //or path to libfftw3 header
 #include "biquad.h"  //IIR Filters
 
 // FFT output parameters
@@ -21,14 +21,35 @@ fftw_plan ftPlanForward;
 
 //Pulse generation
 static  int cyc_cntr;
-static  int duty_cntr; 
+static  int duty_cntr;
 static  int duty_cnt;
 static float r_output;
 static float r_duty_f;
 
 // Noise shaping filter
 biquad_coeffs* nf;
-    
+biquad_coeffs* hpf;
+biquad_coeffs* lpf;
+
+// high frequncy noise generator
+float hf_noise_gen(biquad_coeffs* hpf)
+{
+    // Noise shaped for highest density at high frequencies
+    return run_filter( ((float) (rand()%65536))/65536.0, hpf)/2.0;
+}
+
+float run_pdm(biquad_coeffs* lpf, biquad_coeffs* hpf, float x)
+{
+    float input = x + hf_noise_gen(hpf);
+    float output = 0.0;
+    if( (input - lpf->y1) > 0.0)
+        output = 1.0;
+    run_filter(output, lpf);
+    return output;
+    //return lpf->y1;
+}
+
+
 // Shaped noise PWM function
 float pwm_randseq_tick(float gain)
 {
@@ -40,10 +61,10 @@ float pwm_randseq_tick(float gain)
         cyc_cntr = 0;
         duty_cntr = 0;
         r_output = 1.0;  // set
-        
+
         duty_cnt = (int) (gain*r_duty_f);
         if(duty_cnt > 30) duty_cnt = 30;
-        else if (duty_cnt < 2) 
+        else if (duty_cnt < 2)
             duty_cnt = 2;
     }
 
@@ -52,13 +73,13 @@ float pwm_randseq_tick(float gain)
         duty_cntr = 0;
         r_output = 0.0; // reset
     }
-    
+
     //return r_output;
     if(r_duty_f > 0.0)
         return 1.0;
-    else 
+    else
         return 0.0;
- 
+
 }
 
 // Shaped noise, 1-bit sampled
@@ -71,9 +92,9 @@ float randseq_tick(float gain)
     r_duty_f = run_filter((float) (rand()%2048)/2048.0, nf);
     if(r_duty_f > 0.0)
         return 1.0/ROWS;
-    else 
+    else
         return 0.0;
- 
+
 }
 
 int main(int argc, char** argv)
@@ -88,11 +109,20 @@ int main(int argc, char** argv)
 
     cyc_cntr = 0;
     duty_cntr = 0;
-    duty_cnt = 0; 
+    duty_cnt = 0;
     r_output = 0.0;
     r_duty_f = 0.0;
     nf = make_biquad(BPF, nf, AUDIO_FS, F_CENTER, 1.0);
-    
+
+    // PDM generator filters
+    hpf = make_biquad(HPF, nf, AUDIO_FS, 0.8*AUDIO_FS/2.0, 2.0); //Noise shaping
+    lpf = make_biquad(LPF, nf, AUDIO_FS, 2000.0, 0.707); // Reconstruction
+
+    // Sine oscillator
+    float osc_sin = 1.0;
+    float osc_cos = 0.0;
+    float osc_k = 2.0*M_PI*100.0/AUDIO_FS;
+
     int k;
     for(k=0; k<nfftFrameSize; k++)
     {
@@ -131,10 +161,16 @@ int main(int argc, char** argv)
     {
         fprintf(pImpulse, "Y%d\t", i);
         compute_filter_coeffs(BPF, nf, AUDIO_FS, F_CENTER, F_RES*gp);
+        osc_k = 2.0*M_PI*(100.0 + 1000.0*gp)/AUDIO_FS;
+        osc_sin = 1.0;
+        osc_cos = 0.0;
         for(j=0; j<ROWS; j++)
         {
+            osc_sin += osc_cos*osc_k;
+            osc_cos -= osc_sin*osc_k;
+            y = run_pdm(lpf, hpf, 0.5 + 0.5*osc_cos);
+            //y = randseq_tick(gp);
 
-            y = randseq_tick(gp);
             // if(y == 0.0)
                 // y = 1.0/ROWS;
             // else y = 0.0;
@@ -163,7 +199,7 @@ int main(int argc, char** argv)
         printf("Processing Step: %f\n", gp);
         gp += gstep;
         x = 0.0;
-        
+
     }
     fprintf(pImpulse, "\n");
 
@@ -172,18 +208,18 @@ int main(int argc, char** argv)
     {
         fprintf(pImpulse, "%d\t", j);
 
-        if(ftfreq[j] > 100.0 && ftfreq[j] < 10000.0)
+        if(ftfreq[j] > 10.0 && ftfreq[j] < 21000.0)
             fprintf( pFFT , "%f\t", ftfreq[j]);
 
         for(i=0; i<COLS; i++)
         {
             fprintf(pImpulse, "%f\t", impulse[j][i]);
 
-            if(ftfreq[j] > 100.0 && ftfreq[j] < 10000.0)
+            if(ftfreq[j] > 10.0 && ftfreq[j] < 21000.0)
                 fprintf( pFFT , "%f\t", fft[j][i]);
         }
         fprintf(pImpulse, "\n");
-        if(ftfreq[j] > 100.0 && ftfreq[j] < 10000.0)
+        if(ftfreq[j] > 10.0 && ftfreq[j] < 21000.0)
             fprintf( pFFT , "\n");
     }
 
