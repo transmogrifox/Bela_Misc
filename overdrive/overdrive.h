@@ -20,8 +20,10 @@ typedef struct iir_1p_t
 typedef struct overdrive_t
 {
     float fs;  // Sampling frequency
+    float clipper_fs; // nonlinear processing sampling frequency
     unsigned int oversample;  // Oversampling rate
     unsigned int blksz;
+    float inverse_oversample_float;
 
     // User control settings
     float gain;   // Distortion amount -- 1.0 ... 1000.0
@@ -31,8 +33,13 @@ typedef struct overdrive_t
 
     // Processing buffers
     float *procbuf;
+    
+    // State variables
+    float xn1;
+    float xc1;
 
     // Pre and post emphasis EQ
+    iir_1p anti_alias;
     iir_1p pre_emph;
     iir_1p post_emph;
     iir_1p tone_lp;

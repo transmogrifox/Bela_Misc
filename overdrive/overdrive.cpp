@@ -60,10 +60,14 @@ overdrive* make_overdrive(overdrive* od, unsigned int oversample, unsigned int b
     {
         od->procbuf[i] = 0.0;
     }
+    od->xn1 = 0.0;
+    od->xc1 = 0.0;
 
     od->blksz = bsz;
     od->oversample = oversample;
-    od->fs = ((float) oversample)*fs;
+    od->fs = fs;
+    od->clipper_fs = ((float) oversample)*fs;
+    od->inverse_oversample_float = 1.0/((float) oversample);
 
     // Set defaults
     od->gain = 30.0;
@@ -72,8 +76,9 @@ overdrive* make_overdrive(overdrive* od, unsigned int oversample, unsigned int b
     od->bypass = true;
 
     // Setup EQ stages
+    compute_filter_coeffs(&(od->anti_alias), LPF1P, od->clipper_fs, 7200.0);
     compute_filter_coeffs(&(od->pre_emph), HPF1P, od->fs, 720.0);
-    compute_filter_coeffs(&(od->post_emph), LPF1P, od->fs, 800.0);
+    compute_filter_coeffs(&(od->post_emph), LPF1P, od->clipper_fs, 800.0);
     compute_filter_coeffs(&(od->tone_lp), LPF1P, od->fs, 1200.0);
     compute_filter_coeffs(&(od->tone_hp), HPF1P, od->fs, 700.0);
 
@@ -103,22 +108,50 @@ inline float sqr(float x)
 float thrs = 0.8;
 float nthrs = -0.72;
 float f=1.25;
-void clipper_tick(int N, float* x)  // Add in gain processing and dry mix
+void clipper_tick(overdrive* od, int N, float* x, float* clean)  // Add in gain processing and dry mix
 {
+	float xn = 0.0;
+	float dx = 0.0;
+	float dc = 0.0;
+	float delta = 0.0;
+	float deltac = 0.0;
+	
     for(int i=0; i<N; i++)
     {
-        //Hard limiting
-        if(x[i] >= 1.2) x[i] = 1.2;
-        if(x[i] <= -1.12) x[i] = -1.12;
-
-        //Soft clipping
-        if(x[i] > thrs){
-            x[i] -= f*sqr(x[i] - thrs);
-        }
-        if(x[i] < nthrs){
-            x[i] += f*sqr(x[i] - nthrs);
-        }
-        x[i] *= 0.7;
+    	dx = (x[i] - od->xn1)*od->inverse_oversample_float;
+    	dc = (clean[i] - od->xc1)*od->inverse_oversample_float;
+    	od->xn1 = x[i];
+    	od->xc1 = clean[i];
+    	
+    	for(int n = 0; n < od->oversample; n++)
+    	{
+    		xn = x[i] + delta; // Linear interpolation up-sampling
+    		xn *= od->gain; // Apply gain
+    		clean[i] = clean[i] + deltac; // Upsample clean signal for mix
+    		delta += dx;
+    		deltac += dc;
+	        //Hard limiting
+	        if(xn >= 1.2) xn = 1.2;
+	        if(xn <= -1.12) xn = -1.12;
+	
+	        //Soft clipping
+	        if(xn > thrs){
+	            xn -= f*sqr(xn - thrs);
+	        }
+	        if(xn < nthrs){
+	            xn += f*sqr(xn - nthrs);
+	        }
+	        
+	        // Run de-emphasis and anti-aliasing filters
+	        xn = tick_filter_1p(&(od->post_emph), (clean[i] + 0.7*xn));
+	        xn = tick_filter_1p(&(od->anti_alias), xn);
+    	}
+    	
+    	    delta = 0.0;
+    	    deltac = 0.0;
+    	    // Zero-order hold downsampling assumes de-emphasis filter and anti-aliasing
+    	    // filters sufficiently rejected harmonics > 1/2 base sample rate
+	        x[i] = xn;
     }
 }
 
@@ -226,22 +259,17 @@ void overdrive_tick(overdrive* od, float* x)
     // Run pre-emphasis filter
     for(int i = 0; i<n; i++)
     {
-        od->procbuf[i] = tick_filter_1p(&(od->pre_emph), od->gain*x[i]);
+        od->procbuf[i] = tick_filter_1p(&(od->pre_emph), x[i]);
     }
 
     // Run the clipper
-    clipper_tick(n, od->procbuf);  // This quadratic function seems to generate less objectionable artefacts
+    clipper_tick(od, n, od->procbuf, x);  // This quadratic function seems to generate less objectionable artefacts
     //cubic_clip(n, 0.0, od->procbuf);
 
     // Add clean back in like typical OD circuit
     for(int i = 0; i<n; i++)
     {
-        x[i] += od->procbuf[i];
-    }
-
-    for(int i = 0; i<n; i++)
-    {
-        x[i] = tick_filter_1p(&(od->post_emph), od->level*x[i]);
-        x[i] = tick_filter_1p(&(od->tone_lp), x[i]) + od->tone*tick_filter_1p(&(od->tone_hp), x[i]);
+        x[i] = od->procbuf[i]*od->level;
+        x[i] = 0.25*x[i] + tick_filter_1p(&(od->tone_lp), x[i]) + od->tone*tick_filter_1p(&(od->tone_hp), x[i]);
     }
 }

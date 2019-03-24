@@ -1,5 +1,5 @@
 //
-// Overdrive sketch,
+// Overdrive sketch, 
 //
 
 
@@ -76,6 +76,7 @@ knobs* make_knob(knobs* k, int channel, int N, float fs, float scan_time, float 
 //Filter analog inputs
 // Detect changes in position
 //
+
 void knob_filter_run(knobs* k)
 {
     float x = 0.0;
@@ -225,6 +226,7 @@ void render(BelaContext *context, void *userData)
     //Scan analog inputs and set settings
     for(int i = 0; i < N_KNOBS; i++)
         format_analog_buffer(context, kp[i]);
+
 
     //Run the overdrive on ch0
     overdrive_tick(od, ch0);
