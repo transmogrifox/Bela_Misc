@@ -1,5 +1,5 @@
 //
-// Overdrive sketch, 
+// Overdrive sketch,
 //
 
 
@@ -225,12 +225,6 @@ void render(BelaContext *context, void *userData)
     //Scan analog inputs and set settings
     for(int i = 0; i < N_KNOBS; i++)
         format_analog_buffer(context, kp[i]);
-
-    //Stereo to mono mix (agnostic to which input channel is used)
-    for(unsigned int n = 0; n < context->audioFrames; n++)
-    {
-        ch0[n] += ch1[n];
-    }
 
     //Run the overdrive on ch0
     overdrive_tick(od, ch0);
