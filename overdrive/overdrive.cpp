@@ -115,14 +115,14 @@ void clipper_tick(overdrive* od, int N, float* x, float* clean)  // Add in gain 
 	float dc = 0.0;
 	float delta = 0.0;
 	float deltac = 0.0;
-	
+
     for(int i=0; i<N; i++)
     {
     	dx = (x[i] - od->xn1)*od->inverse_oversample_float;
     	dc = (clean[i] - od->xc1)*od->inverse_oversample_float;
     	od->xn1 = x[i];
     	od->xc1 = clean[i];
-    	
+
     	for(int n = 0; n < od->oversample; n++)
     	{
     		xn = x[i] + delta; // Linear interpolation up-sampling
@@ -133,7 +133,7 @@ void clipper_tick(overdrive* od, int N, float* x, float* clean)  // Add in gain 
 	        //Hard limiting
 	        if(xn >= 1.2) xn = 1.2;
 	        if(xn <= -1.12) xn = -1.12;
-	
+
 	        //Soft clipping
 	        if(xn > thrs){
 	            xn -= f*sqr(xn - thrs);
@@ -141,21 +141,21 @@ void clipper_tick(overdrive* od, int N, float* x, float* clean)  // Add in gain 
 	        if(xn < nthrs){
 	            xn += f*sqr(xn - nthrs);
 	        }
-	        
+
 	        // Run de-emphasis and anti-aliasing filters
 	        xn = tick_filter_1p(&(od->post_emph), (clean[i] + 0.7*xn));
 	        xn = tick_filter_1p(&(od->anti_alias), xn);
     	}
-    	
+
     	    delta = 0.0;
     	    deltac = 0.0;
     	    // Zero-order hold downsampling assumes de-emphasis filter and anti-aliasing
-    	    // filters sufficiently rejected harmonics > 1/2 base sample rate
+    	    // filter sufficiently reject harmonics > 1/2 base sample rate
 	        x[i] = xn;
     }
 }
 
-void cubic_clip(int N, float asym, float* x) 
+void cubic_clip(int N, float asym, float* x)
 {
     float xn = 0.0;
     for(unsigned int n = 0; n < N; n++)
@@ -263,10 +263,12 @@ void overdrive_tick(overdrive* od, float* x)
     }
 
     // Run the clipper
-    clipper_tick(od, n, od->procbuf, x);  // This quadratic function seems to generate less objectionable artefacts
-    //cubic_clip(n, 0.0, od->procbuf);
+    clipper_tick(od, n, od->procbuf, x);  // This quadratic function seems
+                                          // to generate less objectionable artefacts
+                                          // so upsampling was added here.
+    //cubic_clip(n, 0.0, od->procbuf);    // If cubic clip is preferred then upsampling can be added here.
 
-    // Add clean back in like typical OD circuit
+    // Output level and Tone control
     for(int i = 0; i<n; i++)
     {
         x[i] = od->procbuf[i]*od->level;

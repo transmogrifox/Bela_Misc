@@ -29,12 +29,12 @@ typedef struct overdrive_t
     float gain;   // Distortion amount -- 1.0 ... 1000.0
     float tone;   // Tone control -- 0.0 ... 1.0
     float level;  // Output level -- 0.0 ... 1.0
-    bool bypass;
+    bool bypass;  // if bypass == true, does not process overdrive effect
 
     // Processing buffers
     float *procbuf;
-    
-    // State variables
+
+    // State variables for linear up-sampling
     float xn1;
     float xc1;
 
