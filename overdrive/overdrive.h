@@ -29,12 +29,13 @@ typedef struct overdrive_t
     float gain;   // Distortion amount -- 1.0 ... 1000.0
     float tone;   // Tone control -- 0.0 ... 1.0
     float level;  // Output level -- 0.0 ... 1.0
-    bool bypass;  // if bypass == true, does not process overdrive effect
+    float dry;    // Mix like od, or none like distortion
+    bool bypass;
 
     // Processing buffers
     float *procbuf;
-
-    // State variables for linear up-sampling
+    
+    // State variables
     float xn1;
     float xc1;
 
@@ -63,6 +64,7 @@ void od_set_cut_tone_hp(overdrive* od, float fc);
 void od_set_drive(overdrive* od, float drive_db);   // 0 dB to 45 dB
 void od_set_tone(overdrive* od, float hf_level_db); // high pass boost/cut, +/- 12dB
 void od_set_level(overdrive* od, float outlevel_db); // -40 dB to +0 dB
+void od_set_dry(overdrive* od, float dry); // Clean mix, 0.0 to 1.0
 bool od_set_bypass(overdrive* od, bool bypass);
 
 // Run the overdrive effect

@@ -9,10 +9,11 @@
 
 #include "overdrive.h"
 
-#define N_KNOBS         3
+#define N_KNOBS         4
 #define DRIVE           0
 #define TONE            1
 #define LEVEL           2
+#define DRY             3
 
 float *ch0, *ch1;
 int gAudioFramesPerAnalogFrame;
@@ -166,13 +167,16 @@ void format_analog_buffer(BelaContext* context, knobs *k)
 	        switch(k->channel)
 	        {
 	            case DRIVE:
-	                od_set_drive(od, map(k->y2, 0.0, 1.0, 0.0, 40.0) );
+	                od_set_drive(od, map(k->y2, 0.0, 1.0, 12.0, 45.0) );
 	                break;
 	            case TONE:
 	                od_set_tone(od, map(k->y2, 0.0, 1.0, -12.0, 12.0) );
 	                break;
 	            case LEVEL:
 	                od_set_level(od, map(k->y2, 0.0, 1.0, -40.0, 0.0) );
+	                break;
+	            case DRY:
+	                od_set_dry(od, map(k->y2, 0.0, 1.0, 0.0, 1.0) );
 	                break;
 	            default:
 	                break;
@@ -207,7 +211,7 @@ bool setup(BelaContext *context, void *userData)
     for(int i = 0; i < N_KNOBS; i++)
     {
 //make_knob(knobs* k, int channel, int N, float fs, float scan_time, float active_time, float tau, float thrs)
-        kp[i] = make_knob(kp[i], i, context->audioFrames, context->audioSampleRate, 0.15, 1.0 , 0.01, 0.015);
+        kp[i] = make_knob(kp[i], i, context->audioFrames, context->audioSampleRate, 0.15, 1.0 , 0.01, 0.005);
 
     }
 
