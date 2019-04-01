@@ -30,12 +30,26 @@ static float r_duty_f;
 biquad_coeffs* nf;
 biquad_coeffs* hpf;
 biquad_coeffs* lpf;
+static float fq = 4.0;
+
+// Try integrator
+static float integrator;
+static float integrator_dx;
+
+float run_delta_sigma(biquad_coeffs* lpf, float ig, float dx, float x)
+{
+    if(ig > x)
+        ig -= dx;
+    else
+        ig += dx;
+    return run_filter(ig, lpf);
+}
 
 // high frequncy noise generator
 float hf_noise_gen(biquad_coeffs* hpf)
 {
     // Noise shaped for highest density at high frequencies
-    return run_filter( ((float) (rand()%65536))/65536.0, hpf)/2.0;
+    return run_filter( ((float) (rand()%65536))/65536.0, hpf)/fq;
 }
 
 float run_pdm(biquad_coeffs* lpf, biquad_coeffs* hpf, float x)
@@ -115,8 +129,12 @@ int main(int argc, char** argv)
     nf = make_biquad(BPF, nf, AUDIO_FS, F_CENTER, 1.0);
 
     // PDM generator filters
-    hpf = make_biquad(HPF, nf, AUDIO_FS, 0.8*AUDIO_FS/2.0, 2.0); //Noise shaping
-    lpf = make_biquad(LPF, nf, AUDIO_FS, 2000.0, 0.707); // Reconstruction
+    hpf = make_biquad(HPF, nf, AUDIO_FS, 0.8*AUDIO_FS/2.0, fq); //Noise shaping
+    lpf = make_biquad(LPF, nf, AUDIO_FS, 2.0*2205.0, 0.707); // Reconstruction
+
+    // Sigma delta integrator
+    integrator = 0.0;
+    integrator_dx = 1.0/AUDIO_FS;
 
     // Sine oscillator
     float osc_sin = 1.0;
@@ -169,6 +187,7 @@ int main(int argc, char** argv)
             osc_sin += osc_cos*osc_k;
             osc_cos -= osc_sin*osc_k;
             y = run_pdm(lpf, hpf, 0.5 + 0.5*osc_cos);
+            //y = run_delta_sigma(lpf, integrator, integrator_dx, 0.5 + 0.5*osc_cos);
             //y = randseq_tick(gp);
 
             // if(y == 0.0)
@@ -203,8 +222,8 @@ int main(int argc, char** argv)
     }
     fprintf(pImpulse, "\n");
 
-
-    for(j=0; j<ROWS; j++)
+    int downsample = 2;
+    for(j=0; j<ROWS; j+=downsample)
     {
         fprintf(pImpulse, "%d\t", j);
 
