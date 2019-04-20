@@ -3,23 +3,10 @@
 //  Approximate voicing of King of Tone overdrive pedal
 //
 
+#include "iir_1pole.h"
+
 #ifndef KLINGON_H
 #define KLINGON_H
-
-#define LPF1P   0
-#define HPF1P   1
-
-typedef struct iir_1p_t
-{
-    // Coefficients
-    float a1;
-    float b0;
-    float b1;
-
-    // State variables
-    float x1;
-    float y1;
-} iir_1p;
 
 typedef struct klingon_t
 {
