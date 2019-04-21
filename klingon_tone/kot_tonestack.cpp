@@ -85,11 +85,6 @@ void kotstack_compute_filter_coeffs(kot_stack* ks)
     ks->st1.b2 = A2blt;
     ks->st1.gain = gdsp;
 
-    ks->st1.x1 = 0.0;
-    ks->st1.x2 = 0.0;
-    ks->st1.y1 = 0.0;
-    ks->st1.y2 = 0.0;
-
     // Stage 2 filter (order 1)
     // vovxblt = gdsp2*(X0blt*z1 + 1)/(Y0blt*z1 + 1)
     float g2blt = (X0 + kk)/(Y0 + kk);
@@ -106,11 +101,6 @@ void kotstack_compute_filter_coeffs(kot_stack* ks)
     ks->st2.gain = gdsp2;
     //printf("b0= %f b1= %f b2= %f a1=%f a2= %f gain= %f\n", ks->st2.b0,ks->st2.b1, ks->st2.b2,ks->st2.a1,ks->st2.a2 ,ks->st2.gain );
     //printf("b0= %f b1= %f b2= %f a1=%f a2= %f gain= %f\n", ks->st1.b0,ks->st1.b1, ks->st1.b2,ks->st1.a1,ks->st1.a2 ,ks->st1.gain );
-
-    ks->st2.x1 = 0.0;
-    ks->st2.x2 = 0.0;
-    ks->st2.y1 = 0.0;
-    ks->st2.y2 = 0.0;
 
 }
 
@@ -133,10 +123,20 @@ void kotstack_init(kot_stack* ks, float fs_)
     ks->rboost = 50*k;      // Boost pot
 
     // Tone settings
-    ks->tone_pot_pos = 0.5;
-    ks->boost_pot_pos = 1.0;
+    ks->tone_pot_pos = 0.2;
+    ks->boost_pot_pos = 0.25;
 
     kotstack_compute_filter_coeffs(ks);
+    
+    ks->st1.x1 = 0.0;
+    ks->st1.x2 = 0.0;
+    ks->st1.y1 = 0.0;
+    ks->st1.y2 = 0.0;
+    
+    ks->st2.x1 = 0.0;
+    ks->st2.x2 = 0.0;
+    ks->st2.y1 = 0.0;
+    ks->st2.y2 = 0.0;
 
 }
 

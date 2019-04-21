@@ -26,10 +26,10 @@ sz = kk*(1 - z1)./(1 + z1);
 % Tonestack components
 ri = 1*k;         % Feed resistor from final op amp output
 rtone = 25*k;     % Tone Pot
-apos = 0.0;      % Tone Pot position, primary leg resistance ratio
+apos = 0.8;      % Tone Pot position, primary leg resistance ratio
 bpos = 1 - apos;  % Alternate pot leg resistance ratio
 rboost = 50*k;    % Boost pot
-bstpos = 0.01;     % Boost pot position resistance ratio
+bstpos = 0.25;     % Boost pot position resistance ratio
 
 % Components as labeled in derivation
 ra = ri + apos*rtone;

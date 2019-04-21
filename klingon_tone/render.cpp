@@ -9,11 +9,12 @@
 
 #include "klingon.h"
 
-#define N_KNOBS         4
+#define N_KNOBS         5
 #define DRIVE           0
 #define TONE            1
 #define LEVEL           2
-#define DRY             3
+#define DRY				3
+#define BOOST           4
 
 float *ch0, *ch1;
 int gAudioFramesPerAnalogFrame;
@@ -175,7 +176,12 @@ void format_analog_buffer(BelaContext* context, knobs *k)
 	            case LEVEL:
 	                kot_set_level(kot, map(k->y2, 0.0, 1.0, -40.0, 0.0) );
 	                break;
+	            case BOOST:
+	            	kot_set_boost(kot, k->y2);
+	                break;
 	            case DRY:
+	            	kot_set_mix(kot, powf(10.0, map(k->y2, 0.0, 1.0, -60.0, 0.0)/20.0) );
+	                break;
 	            default:
 	                break;
 	        }
