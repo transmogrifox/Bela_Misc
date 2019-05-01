@@ -6,7 +6,6 @@
 
 int load_vi_data(vi_trace* vi, char* filename)
 {
-    float t;
     float v;
     float a;
 
@@ -18,13 +17,11 @@ int load_vi_data(vi_trace* vi, char* filename)
         return -1;
 
     fgets (outstr, 100, handle);
-    //printf("%s\n", outstr);
 
     int cnt = 0;
     while ( fgets(outstr, 100, handle) != NULL)
     {
-        sscanf (outstr, "%e%e%e", &t, &v, &a);
-        //printf("%d\t%f\t%f\n", cnt, v, a);
+        sscanf (outstr, "%e%e", &a, &v);
         cnt++;
     }
     rewind(handle);
@@ -37,7 +34,7 @@ int load_vi_data(vi_trace* vi, char* filename)
     for(int i=0; i < cnt; i++)
     {
         fgets(outstr, 100, handle);
-        sscanf (outstr, "%e%e%e", &t, &v, &a);
+        sscanf (outstr, "%e%e", &a, &v);
         vi->volt[i] = v;
         vi->amp[i] = a;
 
@@ -53,7 +50,7 @@ int load_vi_data(vi_trace* vi, char* filename)
             vi->minamp = a;
     }
 
-    vi->di = (vi->maxamp - vi->minamp)/((float) cnt);
+    vi->di = ((float) (cnt-1))/(vi->maxamp - vi->minamp);
 
     fclose(handle);
     return 0;

@@ -17,11 +17,11 @@ typedef struct vi_trace_t
 int load_vi_data(vi_trace* vi, char* filename);
 
 //
-// LaGrange polynomial interpolator
+// Lagrange polynomial interpolator
 //
 inline float vi_trace_interp(vi_trace* vi, float x_)
 {
-    float x = (x_ - vi->minamp)/vi->di;
+    float x = (x_ - vi->minamp)*vi->di;
     float nx = x;
     float fl = floorf(nx);
     x = x - fl;
@@ -29,11 +29,11 @@ inline float vi_trace_interp(vi_trace* vi, float x_)
 
     // Expecting a function that is flatline at each
     // element at each extreme
-    if ( n > (vi->cnt - 2) )
+    if ( n > (vi->cnt - 3) )
     {
         return vi->volt[n];
     }
-    else if (n < 1)
+    else if (n < 2)
     {
         return vi->volt[n];
     }

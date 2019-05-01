@@ -11,16 +11,14 @@ int main(void)
     const char* fname = "export_clipper_vi_curve.txt";
     load_vi_data(&trace, (char*) fname);
 
-    printf("N\tAmp\tVolt\tAmpI\tVoltI\n");
+    printf("Amp\tVolt\n");
 
-    float dx = trace.di;
-    float x = dx*0.5 + trace.minamp;
+    float dx = (trace.maxamp - trace.minamp)/500.0;
+    float x = trace.minamp;
 
-    for(int i = 0; i < trace.cnt; i++)
+    for(int i = 0; i < 500; i++)
     {
-        //printf("%d\t%f\t%f\t%f\n", i, trace.amp[i], trace.volt[i], vi_trace_interp(&trace, x));
-        printf("%d\t%f\t%f\t%f\t%f\n", i, trace.amp[i], trace.volt[i], x, vi_trace_interp(&trace, x));
-        //printf("%d\t%f\t%f\t%f\n", i, trace.amp[i], trace.volt[i], x);
+        printf("%e\t%f\n", x, vi_trace_interp(&trace, x));
         x += dx;
     }
 
