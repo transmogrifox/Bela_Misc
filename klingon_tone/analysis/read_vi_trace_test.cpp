@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "read_vi_trace.h"
+#include "../read_vi_trace.h"
 
 vi_trace trace;
 

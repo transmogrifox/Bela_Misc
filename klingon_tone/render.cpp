@@ -13,7 +13,7 @@
 #define DRIVE           0
 #define TONE            1
 #define LEVEL           2
-#define DRY				3
+#define DRY		3
 #define BOOST           4
 
 float *ch0, *ch1;

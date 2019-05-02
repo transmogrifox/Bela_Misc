@@ -55,3 +55,10 @@ int load_vi_data(vi_trace* vi, char* filename)
     fclose(handle);
     return 0;
 }
+
+void
+vi_trace_cleanup(vi_trace* vi)
+{
+	free(vi->volt);
+	free(vi->amp);
+}
