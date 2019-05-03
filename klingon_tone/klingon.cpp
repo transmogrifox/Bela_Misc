@@ -105,7 +105,7 @@ void clipper_tick(klingon* kot, int N, float* x, float* clean)  // Add in gain p
     		delta += dx;
     		
     		// Run nonlinear function defined from text file
-    		vi_trace_interp(&(kot->clip), xn);
+    		xn = vi_trace_interp(&(kot->clip), xn);
 
 	        // Run anti-aliasing filter
 	        xn = tick_filter_1p(&(kot->anti_alias), xn);
