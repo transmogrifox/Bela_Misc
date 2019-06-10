@@ -5,15 +5,8 @@
 ## Current Capability ##
 Basic vocoder works "plug & play".  No user-adjustable parameters, so any parameter changes must be hard-coded and re-compiled.
 
-### MOD CH ### 
-
-[Bela Cape Analog Pin 6: IN] -> [DC Removal Filter] -> [Dynamic Range Compressor]->(next line down)->
-
-(cont'd)-> [N-Channel Filterbank] -> [N-Channel Envelope Detector] 
-
-### CARRIER CH ### 
-
-[Bela Cape Audio CH0: IN] -> [N-Channel Filterbank (modulated by MOD CH)] -> [Bela Cape Audio CH0: OUT] 
+## Block Diagram ##
+![Vocoder Block Diagram Image](https://raw.githubusercontent.com/transmogrifox/Bela_Misc/master/vocoder/vocoder_block_diagram.png)
 
 ## Road Map ##
 * Add dynamic range compressor to CARRIER CH also
