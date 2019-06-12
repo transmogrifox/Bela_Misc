@@ -172,6 +172,22 @@ envelope_detector_set_release(envelope_detector* edt, float r_)
 }
 
 void
+envelope_detector_set_pkhold(envelope_detector* edt, float h_)
+{
+	float h = h_; //units of milliseconds
+	if(h < 0.1)
+		h = 0.1;
+	else if (h > 100.0)
+		h = 100.0;
+	
+	h *= 0.001; //convert to units of seconds
+	
+	edt->pk_hold_time = lrintf(h*edt->fs);
+	edt->pkrls = expf(-edt->ifs/(2.0*h));
+	
+}
+
+void
 envelope_detector_destructor(envelope_detector* edt)
 {
 	free(edt);

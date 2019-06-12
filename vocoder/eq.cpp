@@ -336,3 +336,11 @@ plot_response(float f1, float f2, int pts, eq_coeffs* cf, float fs, cx *r)
 
 
 }
+
+//Function to get parameters
+float
+eq_get_filterbank_f0(eq_filters* eq, size_t band)
+{
+	return eq->band[band]->f0;
+}
+

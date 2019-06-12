@@ -65,6 +65,9 @@ make_eq_band(int type, eq_coeffs* cf, float fs, float f0, float Q, float G);
 eq_filters*
 make_filterbank(eq_filters* eq, size_t nbands, float fstart_, float fstop_, float sample_rate);
 
+float
+eq_get_filterbank_f0(eq_filters* eq, size_t band);
+
 // De-allocate all dynamically allocated memory on an EQ
 void
 destroy_equalizer(eq_filters* eq);

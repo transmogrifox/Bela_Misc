@@ -14,6 +14,8 @@ vocoder *vcd;
 float *ch0, *ch1, *vox;
 float *a, *b;
 
+float mix_carrier, imix_carrier;
+
 eq_coeffs* vox_lpf;
 
 int gAudioFramesPerAnalogFrame;
@@ -72,6 +74,8 @@ bool setup(BelaContext *context, void *userData)
 	vox_dcr->y1 = 0.0;
 	
 	vox_lpf = make_eq_band(LPF, vox_lpf, fs, 4000.0, 0.707, 1.0);
+	mix_carrier = 0.98;
+	imix_carrier = 1.0 - mix_carrier;
     
 	scope.setup(3, context->audioSampleRate);
 	
@@ -82,6 +86,9 @@ void render(BelaContext *context, void *userData)
 {
 	float x0 = 0.0;
 	float y0 = 0.0;
+
+	format_audio_buffer(context, ch0, 0);
+	format_audio_buffer(context, ch1, 1);
 	
 	for(unsigned int n = 0; n < context->audioFrames; n++) 
 	{
@@ -94,11 +101,9 @@ void render(BelaContext *context, void *userData)
 		vox_dcr->y1 = y0;
 		vox[n] = tick_eq_band(vox_lpf, y0);
 		b[n] = vox[n];
+		ch1[n] = imix_carrier*y0 + mix_carrier*ch1[n];
 	}
 
-	format_audio_buffer(context, ch0, 0);
-	format_audio_buffer(context, ch1, 1);
-	
 	vocoder_tick_n(vcd, ch1, vox);
 	
 	for(unsigned int n = 0; n < context->audioFrames; n++) 

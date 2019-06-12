@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-//#include <math_neon.h>
+#include <math_neon.h>
 
 #include "fb_compressor.h"
 
@@ -232,8 +232,8 @@ feedback_compressor_tick_n(feedback_compressor* fbc, float *x, float *envelope)
         }
     	else //linear in log domain
     	{
-    		//fbc->gain = expf_neon( fbc->ak*(fbc->tk + yk*fbc->mk) );
-            fbc->gain = expf( fbc->ak*(fbc->tk + yk*fbc->mk) );
+    		fbc->gain = expf_neon( fbc->ak*(fbc->tk + yk*fbc->mk) );
+            //fbc->gain = expf( fbc->ak*(fbc->tk + yk*fbc->mk) );
     	}
 
         if(fbc->gain < fbc->dynrange)

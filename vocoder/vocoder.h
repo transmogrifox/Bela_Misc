@@ -22,6 +22,10 @@ typedef struct vocoder_t
     // User params
     float gate;
     float out_volume;
+    float duck_atk;
+    float duck_rls;
+    float duck_sns;
+    float duck_sv;
 } vocoder;
 
 vocoder*

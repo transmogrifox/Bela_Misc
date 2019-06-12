@@ -57,6 +57,10 @@ envelope_detector_set_attack(envelope_detector* edt, float a_);
 void
 envelope_detector_set_release(envelope_detector* edt, float r_);
 
+//Peak detector hold time: 100us to 100 ms
+void
+envelope_detector_set_pkhold(envelope_detector* edt, float h_);
+
 //deallocate memory when finished using the struct
 void
 envelope_detector_destructor(envelope_detector* edt);
